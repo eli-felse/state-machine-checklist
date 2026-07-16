@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>State Machine Checklist</title>
+<meta name="description" content="Build interactive checklists for state machine design: define states, events, and transitions, and track your design and testing progress.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site-header">
+  <h1>State Machine Checklist</h1>
+  <p class="tagline">Define states, events &amp; transitions — get a live checklist for designing and testing your state machine.</p>
+</header>
+
+<main id="main">
+
+  <section class="panel saved-panel" aria-labelledby="saved-heading">
+    <h2 id="saved-heading">Checklists</h2>
+    <div class="row">
+      <label for="checklist-name" class="visually-hidden">Checklist name</label>
+      <input type="text" id="checklist-name" placeholder="Checklist name (e.g. Traffic Light)" aria-label="Checklist name">
+      <button id="btn-save" type="button">Save</button>
+      <button id="btn-new" type="button">New</button>
+    </div>
+    <div class="row">
+      <label for="saved-select" class="visually-hidden">Saved checklists</label>
+      <select id="saved-select" aria-label="Saved checklists">
+        <option value="">— Saved checklists —</option>
+      </select>
+      <button id="btn-load" type="button">Load</button>
+      <button id="btn-delete" type="button" class="danger">Delete</button>
+    </div>
+    <p id="save-status" class="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <div class="grid">
+
+    <section class="panel builder-panel" aria-labelledby="builder-heading">
+      <h2 id="builder-heading">Design your state machine</h2>
+
+      <fieldset class="field-group">
+        <legend>States</legend>
+        <div class="row">
+          <label for="state-input" class="visually-hidden">New state name</label>
+          <input type="text" id="state-input" placeholder="e.g. Idle" aria-label="New state name">
+          <button id="btn-add-state" type="button">Add state</button>
+        </div>
+        <ul id="states-list" class="chip-list" aria-label="Defined states"></ul>
+      </fieldset>
+
+      <fieldset class="field-group">
+        <legend>Events</legend>
+        <div class="row">
+          <label for="event-input" class="visually-hidden">New event name</label>
+          <input type="text" id="event-input" placeholder="e.g. start" aria-label="New event name">
+          <button id="btn-add-event" type="button">Add event</button>
+        </div>
+        <ul id="events-list" class="chip-list" aria-label="Defined events"></ul>
+      </fieldset>
+
+      <fieldset class="field-group">
+        <legend>Transitions</legend>
+        <div class="row transition-row">
+          <label for="trans-from" class="visually-hidden">From state</label>
+          <select id="trans-from" aria-label="From state"></select>
+          <span class="arrow" aria-hidden="true">--(</span>
+          <label for="trans-event" class="visually-hidden">On event</label>
+          <select id="trans-event" aria-label="On event"></select>
+          <span class="arrow" aria-hidden="true">)--&gt;</span>
+          <label for="trans-to" class="visually-hidden">To state</label>
+          <select id="trans-to" aria-label="To state"></select>
+          <button id="btn-add-trans" type="button">Add</button>
+        </div>
+        <p class="hint">Add at least one state and one event to create transitions.</p>
+        <ul id="trans-list" class="chip-list trans-chip-list" aria-label="Defined transitions"></ul>
+      </fieldset>
+    </section>
+
+    <section class="panel preview-panel" aria-labelledby="preview-heading">
+      <div class="preview-header">
+        <h2 id="preview-heading">Live checklist preview</h2>
+        <button id="btn-download" type="button">Download as HTML</button>
+      </div>
+
+      <div id="checklist-output" aria-live="polite">
+        <p class="empty-msg">Add states, events, and transitions to generate your checklist.</p>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <p>Made by Eli</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
