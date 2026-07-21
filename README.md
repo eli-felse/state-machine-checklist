@@ -1,6 +1,6 @@
-# Stream Suggestions: Trending Section Add-On
+# State Machine Checklist
 
-An interactive tool for designing state machines: add states, events, and transitions, and instantly get a checklist covering implementation tasks and design best practices, plus automated checks for issues like unreachable states or unused events. Checklist items can be upvoted, with a trending section surfacing the top 3 most-upvoted items from the last hour. Checklists can be saved, reloaded, and downloaded as a standalone, self-contained HTML file.
+An interactive tool for designing state machines: add states, events, and transitions, and instantly get a checklist covering implementation tasks and design best practices, plus automated checks for issues like unreachable states or unused events. Checklists can be saved, reloaded, and downloaded as a standalone, self-contained HTML file.
 
 **Tags:** html, css, javascript
 

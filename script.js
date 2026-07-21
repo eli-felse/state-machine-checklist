@@ -17,15 +17,12 @@
     "Write tests covering invalid/unexpected event handling"
   ];
 
-  var TRENDING_WINDOW_MS = 60 * 60 * 1000;
-
   var state = {
     name: "",
     states: [],
     events: [],
     transitions: [],
-    checked: {},
-    upvotes: {}
+    checked: {}
   };
 
   function $(id) {
@@ -86,7 +83,6 @@
         state.events = Array.isArray(data.events) ? data.events : [];
         state.transitions = Array.isArray(data.transitions) ? data.transitions : [];
         state.checked = data.checked && typeof data.checked === "object" ? data.checked : {};
-        state.upvotes = data.upvotes && typeof data.upvotes === "object" ? data.upvotes : {};
       }
     } catch (e) {
       /* ignore corrupt data */
@@ -210,47 +206,6 @@
   function removeTransition(index) {
     state.transitions.splice(index, 1);
     onDataChanged();
-  }
-
-  function upvoteCount(key) {
-    var timestamps = state.upvotes[key];
-    return timestamps ? timestamps.length : 0;
-  }
-
-  function upvoteItem(key) {
-    if (!state.upvotes[key]) state.upvotes[key] = [];
-    state.upvotes[key].push(Date.now());
-    persistCurrent();
-    renderPreview();
-  }
-
-  function computeTrending() {
-    var now = Date.now();
-    var windowStart = now - TRENDING_WINDOW_MS;
-    var labelByKey = {};
-    buildChecklistItems().forEach(function (it) {
-      labelByKey[it.key] = it;
-    });
-
-    var ranked = Object.keys(state.upvotes)
-      .filter(function (key) {
-        return !!labelByKey[key];
-      })
-      .map(function (key) {
-        var recentCount = state.upvotes[key].filter(function (t) {
-          return t >= windowStart;
-        }).length;
-        return { key: key, count: recentCount, label: labelByKey[key].label, group: labelByKey[key].group };
-      })
-      .filter(function (entry) {
-        return entry.count > 0;
-      });
-
-    ranked.sort(function (a, b) {
-      return b.count - a.count;
-    });
-
-    return ranked.slice(0, 3);
   }
 
   function onDataChanged() {
@@ -454,33 +409,6 @@
       return;
     }
 
-    var trending = computeTrending();
-    if (trending.length) {
-      var trendSection = document.createElement("div");
-      trendSection.className = "checklist-section trending-section";
-      var h3t = document.createElement("h3");
-      h3t.textContent = "\uD83D\uDD25 Trending (last hour)";
-      trendSection.appendChild(h3t);
-
-      var trendList = document.createElement("ol");
-      trendList.className = "trending-list";
-      trending.forEach(function (t) {
-        var li = document.createElement("li");
-        li.className = "trending-item";
-        var labelSpan = document.createElement("span");
-        labelSpan.className = "trending-label";
-        labelSpan.textContent = t.label;
-        var countSpan = document.createElement("span");
-        countSpan.className = "trending-count";
-        countSpan.textContent = "\u25B2 " + t.count + (t.count === 1 ? " upvote" : " upvotes");
-        li.appendChild(labelSpan);
-        li.appendChild(countSpan);
-        trendList.appendChild(li);
-      });
-      trendSection.appendChild(trendList);
-      container.appendChild(trendSection);
-    }
-
     var groups = ["States", "Events", "Transitions", "Best practices"];
     groups.forEach(function (groupName) {
       var groupItems = items.filter(function (it) {
@@ -516,23 +444,8 @@
         label.setAttribute("for", id);
         label.textContent = it.label;
 
-        var main = document.createElement("div");
-        main.className = "checklist-item-main";
-        main.appendChild(checkbox);
-        main.appendChild(label);
-
-        var count = upvoteCount(it.key);
-        var upvoteBtn = document.createElement("button");
-        upvoteBtn.type = "button";
-        upvoteBtn.className = "upvote-btn";
-        upvoteBtn.textContent = "\u25B2 " + count;
-        upvoteBtn.setAttribute("aria-label", "Upvote suggestion: " + it.label + " (" + count + (count === 1 ? " upvote" : " upvotes") + ")");
-        upvoteBtn.addEventListener("click", function () {
-          upvoteItem(it.key);
-        });
-
-        li.appendChild(main);
-        li.appendChild(upvoteBtn);
+        li.appendChild(checkbox);
+        li.appendChild(label);
         ul.appendChild(li);
       });
       section.appendChild(ul);
@@ -583,8 +496,7 @@
       states: state.states,
       events: state.events,
       transitions: state.transitions,
-      checked: state.checked,
-      upvotes: state.upvotes
+      checked: state.checked
     };
     if (setSaved(saved)) {
       refreshSavedSelect();
@@ -613,7 +525,6 @@
     state.events = Array.isArray(data.events) ? data.events.slice() : [];
     state.transitions = Array.isArray(data.transitions) ? data.transitions.slice() : [];
     state.checked = data.checked && typeof data.checked === "object" ? Object.assign({}, data.checked) : {};
-    state.upvotes = data.upvotes && typeof data.upvotes === "object" ? Object.assign({}, data.upvotes) : {};
     els.checklistName.value = state.name;
     persistCurrent();
     renderAll();
@@ -639,7 +550,6 @@
     state.events = [];
     state.transitions = [];
     state.checked = {};
-    state.upvotes = {};
     els.checklistName.value = "";
     els.savedSelect.value = "";
     persistCurrent();
