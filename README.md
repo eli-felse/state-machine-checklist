@@ -1,6 +1,6 @@
 # State Machine Checklist
 
-An interactive tool for designing state machines: add states, events, and transitions, and instantly get a checklist covering implementation tasks and design best practices, plus automated checks for issues like unreachable states or unused events. Checklists can be saved, reloaded, and downloaded as a standalone, self-contained HTML file.
+An interactive tool for designing state machines: add states, events, and transitions, and instantly get a checklist covering implementation tasks, naming convention guidelines, and design best practices, plus automated checks for issues like unreachable states or unused events. Includes a light/dark mode toggle. Checklists can be saved, reloaded, and downloaded as a standalone, self-contained HTML file.
 
 **Tags:** html, css, javascript
 

@@ -11,6 +11,18 @@
   --font-mono: "SFMono-Regular", "Consolas", "Liberation Mono", Menlo, Courier, monospace;
 }
 
+body.light-theme {
+  --bg: #f4f6f8;
+  --panel: #ffffff;
+  --panel-border: #d4d8e0;
+  --text: #1b1e24;
+  --text-dim: #565c6b;
+  --accent: #1a7a54;
+  --accent-dim: #d6f0e3;
+  --danger: #b8342e;
+  --warn: #93630f;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -28,6 +40,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .skip-link {
@@ -54,9 +67,17 @@ body {
 }
 
 .site-header {
+  position: relative;
   padding: 2rem 1.5rem 1rem;
   text-align: center;
   border-bottom: 1px solid var(--panel-border);
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  background: transparent;
 }
 
 .site-header h1 {

@@ -3,6 +3,7 @@
 
   var STORAGE_SAVED = "smc_saved_checklists";
   var STORAGE_CURRENT = "smc_current_checklist";
+  var STORAGE_THEME = "smc_theme";
 
   var BEST_PRACTICES = [
     "Identify and document all possible states",
@@ -15,6 +16,14 @@
     "Check for unreachable states (no incoming transitions and not the initial state)",
     "Write tests covering every defined transition path",
     "Write tests covering invalid/unexpected event handling"
+  ];
+
+  var NAMING_CONVENTIONS = [
+    "Use verbs for event names (e.g. 'start', 'stop', 'submit')",
+    "Use nouns or adjectives for state names (e.g. 'idle', 'running', 'active')",
+    "Avoid single-letter or overly abbreviated state and event names",
+    "Use consistent casing across all names (e.g. always lowerCamelCase or always kebab-case)",
+    "Avoid names that could apply to either a state or an event — keep the two vocabularies distinct"
   ];
 
   var state = {
@@ -30,6 +39,8 @@
   }
 
   var els = {
+    btnThemeToggle: $("btn-theme-toggle"),
+
     checklistName: $("checklist-name"),
     btnSave: $("btn-save"),
     btnNew: $("btn-new"),
@@ -68,6 +79,34 @@
 
   function transKey(t) {
     return t.from + "|" + t.event + "|" + t.to;
+  }
+
+  // ---------- Theme ----------
+
+  function applyTheme(theme) {
+    document.body.classList.toggle("light-theme", theme === "light");
+    els.btnThemeToggle.textContent = theme === "light" ? "Dark mode" : "Light mode";
+    els.btnThemeToggle.setAttribute("aria-pressed", theme === "light" ? "true" : "false");
+  }
+
+  function loadTheme() {
+    var theme = "dark";
+    try {
+      theme = localStorage.getItem(STORAGE_THEME) || "dark";
+    } catch (e) {
+      /* storage unavailable; default to dark */
+    }
+    applyTheme(theme);
+  }
+
+  function toggleTheme() {
+    var next = document.body.classList.contains("light-theme") ? "dark" : "light";
+    applyTheme(next);
+    try {
+      localStorage.setItem(STORAGE_THEME, next);
+    } catch (e) {
+      /* fail silently */
+    }
   }
 
   // ---------- Persistence ----------
@@ -323,6 +362,10 @@
       });
     });
 
+    NAMING_CONVENTIONS.forEach(function (label, i) {
+      items.push({ key: "naming:" + i, label: label, group: "Naming conventions" });
+    });
+
     BEST_PRACTICES.forEach(function (label, i) {
       items.push({ key: "best:" + i, label: label, group: "Best practices" });
     });
@@ -409,7 +452,7 @@
       return;
     }
 
-    var groups = ["States", "Events", "Transitions", "Best practices"];
+    var groups = ["States", "Events", "Transitions", "Naming conventions", "Best practices"];
     groups.forEach(function (groupName) {
       var groupItems = items.filter(function (it) {
         return it.group === groupName;
@@ -563,7 +606,7 @@
     var title = state.name || "State Machine Checklist";
     var items = buildChecklistItems();
     var checks = computeAutoChecks();
-    var groups = ["States", "Events", "Transitions", "Best practices"];
+    var groups = ["States", "Events", "Transitions", "Naming conventions", "Best practices"];
 
     var sectionsHtml = groups.map(function (groupName) {
       var groupItems = items.filter(function (it) { return it.group === groupName; });
@@ -644,6 +687,8 @@
   // ---------- Init ----------
 
   function attachEvents() {
+    els.btnThemeToggle.addEventListener("click", toggleTheme);
+
     els.btnAddState.addEventListener("click", addState);
     els.stateInput.addEventListener("keydown", function (e) {
       if (e.key === "Enter") { e.preventDefault(); addState(); }
@@ -664,6 +709,7 @@
   }
 
   function init() {
+    loadTheme();
     loadCurrent();
     els.checklistName.value = state.name || "";
     refreshSavedSelect();
