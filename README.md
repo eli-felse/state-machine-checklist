@@ -1,6 +1,6 @@
-# State Machine Checklist
+# D
 
-An interactive tool for designing state machines: add states, events, and transitions, and instantly get a checklist covering implementation tasks, naming convention guidelines, and design best practices, plus automated checks for issues like unreachable states or unused events. Includes a light/dark mode toggle. Checklists can be saved, reloaded, and downloaded as a standalone, self-contained HTML file.
+An interactive tool for designing state machines: add states, events, and transitions, mark states as terminal, and instantly get a checklist covering implementation tasks, naming convention guidelines, and design best practices, plus automated checks for issues like unreachable states, unused events, and non-terminal states with no outgoing transitions. Includes a light/dark mode toggle. Checklists can be saved, reloaded, and downloaded as a standalone, self-contained HTML file that always uses the dark theme.
 
 **Tags:** html, css, javascript
 
@@ -19,4 +19,4 @@ Learn more at [elifelse.org](https://elifelse.org)
 
 ---
 
-Built with `anthropic/claude-sonnet-5`
+Built with `anthropic/claude-sonnet-5.5`

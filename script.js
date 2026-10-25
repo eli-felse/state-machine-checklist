@@ -29,6 +29,7 @@
   var state = {
     name: "",
     states: [],
+    terminal: [],
     events: [],
     transitions: [],
     checked: {}
@@ -119,6 +120,7 @@
       if (data && typeof data === "object") {
         state.name = data.name || "";
         state.states = Array.isArray(data.states) ? data.states : [];
+        state.terminal = Array.isArray(data.terminal) ? data.terminal : [];
         state.events = Array.isArray(data.events) ? data.events : [];
         state.transitions = Array.isArray(data.transitions) ? data.transitions : [];
         state.checked = data.checked && typeof data.checked === "object" ? data.checked : {};
@@ -197,9 +199,26 @@
   function removeState(index) {
     var removed = state.states[index];
     state.states.splice(index, 1);
+    state.terminal = state.terminal.filter(function (s) {
+      return s !== removed;
+    });
     state.transitions = state.transitions.filter(function (t) {
       return t.from !== removed && t.to !== removed;
     });
+    onDataChanged();
+  }
+
+  function isTerminal(name) {
+    return state.terminal.indexOf(name) !== -1;
+  }
+
+  function setTerminal(name, on) {
+    var idx = state.terminal.indexOf(name);
+    if (on && idx === -1) {
+      state.terminal.push(name);
+    } else if (!on && idx !== -1) {
+      state.terminal.splice(idx, 1);
+    }
     onDataChanged();
   }
 
@@ -261,6 +280,18 @@
       li.className = "chip";
       var span = document.createElement("span");
       span.textContent = s;
+      var termLabel = document.createElement("label");
+      termLabel.className = "terminal-toggle";
+      termLabel.title = "Terminal states are not expected to have outgoing transitions";
+      var termBox = document.createElement("input");
+      termBox.type = "checkbox";
+      termBox.checked = isTerminal(s);
+      termBox.setAttribute("aria-label", "Mark state " + s + " as terminal");
+      termBox.addEventListener("change", function () {
+        setTerminal(s, termBox.checked);
+      });
+      termLabel.appendChild(termBox);
+      termLabel.appendChild(document.createTextNode(" terminal"));
       var btn = document.createElement("button");
       btn.type = "button";
       btn.textContent = "×";
@@ -269,6 +300,7 @@
         removeState(i);
       });
       li.appendChild(span);
+      li.appendChild(termLabel);
       li.appendChild(btn);
       els.statesList.appendChild(li);
     });
@@ -394,14 +426,15 @@
       }
 
       var noOutgoing = state.states.filter(function (s) {
+        if (isTerminal(s)) return false;
         return !state.transitions.some(function (t) {
           return t.from === s;
         });
       });
       if (noOutgoing.length) {
-        checks.push({ ok: false, text: "States with no outgoing transitions (verify these are intentional terminal states): " + noOutgoing.join(", ") });
+        checks.push({ ok: false, text: "States with no outgoing transitions (add one, or mark as terminal if intentional): " + noOutgoing.join(", ") });
       } else {
-        checks.push({ ok: true, text: "Every state has at least one outgoing transition." });
+        checks.push({ ok: true, text: "Every non-terminal state has at least one outgoing transition." });
       }
     }
 
@@ -537,6 +570,7 @@
     saved[name] = {
       name: name,
       states: state.states,
+      terminal: state.terminal,
       events: state.events,
       transitions: state.transitions,
       checked: state.checked
@@ -565,6 +599,7 @@
     }
     state.name = data.name || name;
     state.states = Array.isArray(data.states) ? data.states.slice() : [];
+    state.terminal = Array.isArray(data.terminal) ? data.terminal.slice() : [];
     state.events = Array.isArray(data.events) ? data.events.slice() : [];
     state.transitions = Array.isArray(data.transitions) ? data.transitions.slice() : [];
     state.checked = data.checked && typeof data.checked === "object" ? Object.assign({}, data.checked) : {};
@@ -590,6 +625,7 @@
   function handleNew() {
     state.name = "";
     state.states = [];
+    state.terminal = [];
     state.events = [];
     state.transitions = [];
     state.checked = {};
@@ -635,14 +671,17 @@
       '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
       "<title>" + escapeHtml(title) + " — State Machine Checklist</title>\n" +
       "<style>\n" +
-      "body{background:#0f1115;color:#e4e6eb;font-family:SFMono-Regular,Consolas,'Liberation Mono',Menlo,Courier,monospace;line-height:1.5;max-width:760px;margin:0 auto;padding:2rem 1.25rem;}\n" +
-      "h1{font-size:1.5rem;} h3{font-size:0.9rem;color:#9aa0ac;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #2a2e38;padding-bottom:0.3rem;}\n" +
+      // Always the dark palette, regardless of the theme active in the editor session.
+      ":root{color-scheme:dark;--bg:#0f1115;--panel-border:#2a2e38;--text:#e4e6eb;--text-dim:#9aa0ac;--accent:#5fd3a4;--warn:#e0b85f;}\n" +
+      "html{background:var(--bg);}\n" +
+      "body{background:var(--bg);color:var(--text);font-family:SFMono-Regular,Consolas,'Liberation Mono',Menlo,Courier,monospace;line-height:1.5;max-width:760px;margin:0 auto;padding:2rem 1.25rem;}\n" +
+      "h1{font-size:1.5rem;} h3{font-size:0.9rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--panel-border);padding-bottom:0.3rem;}\n" +
       ".checklist-section{margin-top:1.25rem;} ul.check-list{list-style:none;margin:0;padding:0;}\n" +
       ".checklist-item{display:flex;gap:0.5rem;align-items:flex-start;padding:0.35rem 0;font-size:0.95rem;}\n" +
-      ".checklist-item input{margin-top:0.2rem;accent-color:#5fd3a4;}\n" +
-      ".checklist-item.checked label{color:#9aa0ac;text-decoration:line-through;}\n" +
-      ".checks-pass{color:#5fd3a4;padding:0.3rem 0;font-size:0.85rem;} .checks-warn{color:#e0b85f;padding:0.3rem 0;font-size:0.85rem;}\n" +
-      "footer{margin-top:2rem;color:#9aa0ac;font-size:0.85rem;text-align:center;border-top:1px solid #2a2e38;padding-top:1rem;}\n" +
+      ".checklist-item input{margin-top:0.2rem;accent-color:var(--accent);}\n" +
+      ".checklist-item.checked label{color:var(--text-dim);text-decoration:line-through;}\n" +
+      ".checks-pass{color:var(--accent);padding:0.3rem 0;font-size:0.85rem;} .checks-warn{color:var(--warn);padding:0.3rem 0;font-size:0.85rem;}\n" +
+      "footer{margin-top:2rem;color:var(--text-dim);font-size:0.85rem;text-align:center;border-top:1px solid var(--panel-border);padding-top:1rem;}\n" +
       "</style>\n</head>\n<body>\n" +
       "<h1>" + escapeHtml(title) + "</h1>\n" +
       "<p>Exported state machine checklist. Progress on this page is saved to this browser only.</p>\n" +
