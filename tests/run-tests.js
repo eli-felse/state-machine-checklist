@@ -311,6 +311,34 @@ test("unreachable: an incoming transition makes the target reachable", function 
   assert.ok(/reachable/.test(c.text));
 });
 
+test("unreachable: initial state A transitions to B, but C is never targeted by any transition", function () {
+  var app = createApp();
+  app.addState("A");
+  app.addState("B");
+  app.addState("C");
+  app.addEvent("go");
+  app.addTransition("A", "go", "B");
+  var c = app.unreachableCheck();
+  assert.ok(!c.ok);
+  assert.ok(/Unreachable states/.test(c.text));
+  assert.ok(/\bC\b/.test(c.text), "C has no incoming transition, so it should be flagged");
+  assert.ok(!/\bA\b/.test(c.text), "initial state A must not be flagged");
+  assert.ok(!/\bB\b/.test(c.text), "B has an incoming transition from A, so it must not be flagged");
+});
+
+test("unreachable: a non-terminal state whose only transition is a self-loop can't make progress toward a terminal state", function () {
+  var app = createApp();
+  app.addState("A");
+  app.addState("Done");
+  app.addEvent("spin");
+  app.addTransition("A", "spin", "A");
+  app.setTerminal("Done", true);
+  var c = app.unreachableCheck();
+  assert.ok(!c.ok, "Done has no incoming transition, so it must stay flagged as unreachable");
+  assert.ok(/\bDone\b/.test(c.text));
+  assert.ok(!/\bA\b/.test(c.text), "A is the initial state, so its self-loop must not cause it to be flagged");
+});
+
 test("unreachable: every unreachable state is listed, comma-separated, in definition order", function () {
   var app = createApp();
   ["Start", "Orphan1", "Mid", "Orphan2"].forEach(app.addState);
